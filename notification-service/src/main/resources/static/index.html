@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Service - WebSocket Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .status.disconnected {
+            background: #ef4444;
+        }
+        .status.connected {
+            background: #10b981;
+        }
+        .status.connecting {
+            background: #f59e0b;
+        }
+        .content {
+            padding: 30px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-connect {
+            background: #10b981;
+            color: white;
+        }
+        .btn-disconnect {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-ping {
+            background: #3b82f6;
+            color: white;
+        }
+        .notifications {
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .notifications h3 {
+            margin-bottom: 15px;
+            color: #374151;
+        }
+        .notification {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .notification .time {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+        .notification .type {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        .notification .message {
+            color: #374151;
+            font-size: 14px;
+            word-wrap: break-word;
+        }
+        .notification.CONNECTED .type {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .notification.PONG .type {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .notification.event .type {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .stat-box {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-box .label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+        .stat-box .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔔 Notification Service</h1>
+            <p>WebSocket Real-time Notifications</p>
+            <span id="status" class="status disconnected">Отключено</span>
+        </div>
+
+        <div class="content">
+            <div class="controls">
+                <button id="connectBtn" class="btn-connect">Подключиться</button>
+                <button id="disconnectBtn" class="btn-disconnect" disabled>Отключиться</button>
+                <button id="pingBtn" class="btn-ping" disabled>Отправить Ping</button>
+            </div>
+
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="label">Всего уведомлений</div>
+                    <div class="value" id="totalCount">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Активных подключений</div>
+                    <div class="value" id="activeConnections">-</div>
+                </div>
+            </div>
+
+            <div class="notifications">
+                <h3>📬 Уведомления:</h3>
+                <div id="notificationList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let notificationCount = 0;
+
+        const statusEl = document.getElementById('status');
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const pingBtn = document.getElementById('pingBtn');
+        const notificationListEl = document.getElementById('notificationList');
+        const totalCountEl = document.getElementById('totalCount');
+        const activeConnectionsEl = document.getElementById('activeConnections');
+
+        function updateStatus(status, text) {
+            statusEl.className = `status ${status}`;
+            statusEl.textContent = text;
+        }
+
+        function addNotification(data) {
+            notificationCount++;
+            totalCountEl.textContent = notificationCount;
+
+            const notifDiv = document.createElement('div');
+            const type = data.type || 'event';
+            notifDiv.className = `notification ${type}`;
+
+            const now = new Date().toLocaleTimeString('ru-RU');
+
+            notifDiv.innerHTML = `
+                <div class="time">${now}</div>
+                <span class="type">${type}</span>
+                <div class="message">${JSON.stringify(data, null, 2)}</div>
+            `;
+
+            notificationListEl.insertBefore(notifDiv, notificationListEl.firstChild);
+
+            if (data.activeConnections !== undefined) {
+                activeConnectionsEl.textContent = data.activeConnections;
+            }
+
+            if (notificationListEl.children.length > 50) {
+                notificationListEl.removeChild(notificationListEl.lastChild);
+            }
+        }
+
+        function connect() {
+            const wsUrl = `ws://${window.location.host}/ws/notifications`;
+            updateStatus('connecting', 'Подключение...');
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                console.log('WebSocket connected');
+                updateStatus('connected', 'Подключено');
+                connectBtn.disabled = true;
+                disconnectBtn.disabled = false;
+                pingBtn.disabled = false;
+            };
+
+            ws.onmessage = (event) => {
+                console.log('Received:', event.data);
+                try {
+                    const data = JSON.parse(event.data);
+                    addNotification(data);
+                } catch (e) {
+                    console.error('Failed to parse message:', e);
+                    addNotification({ type: 'ERROR', message: event.data });
+                }
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                addNotification({ type: 'ERROR', message: 'WebSocket error occurred' });
+            };
+
+            ws.onclose = (event) => {
+                console.log('WebSocket closed:', event.code, event.reason);
+                updateStatus('disconnected', 'Отключено');
+                connectBtn.disabled = false;
+                disconnectBtn.disabled = true;
+                pingBtn.disabled = true;
+                activeConnectionsEl.textContent = '-';
+            };
+        }
+
+        function disconnect() {
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+        }
+
+        function sendPing() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send('ping');
+                console.log('Ping sent');
+            }
+        }
+
+        connectBtn.addEventListener('click', connect);
+        disconnectBtn.addEventListener('click', disconnect);
+        pingBtn.addEventListener('click', sendPing);
+
+        // Автоподключение при загрузке
+        window.addEventListener('load', () => {
+            setTimeout(connect, 500);
+        });
+    </script>
+</body>
+</html>

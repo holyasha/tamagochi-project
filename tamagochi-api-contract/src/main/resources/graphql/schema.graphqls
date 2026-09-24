@@ -1,0 +1,131 @@
+# =============================================================================
+# GraphQL-контракт для Tamagochi API
+# =============================================================================
+
+scalar DateTime
+scalar Date
+
+# ---------------------------------------------------------------------------
+# Основные типы
+# ---------------------------------------------------------------------------
+
+type Owner {
+    id: ID!
+    name: String!
+    birthDate: Date!
+    tamagochisCount: Int!
+
+    tamagochis(page: Int = 0, size: Int = 20): TamagochiConnection!
+}
+
+type Tamagochi {
+    id: ID!
+    name: String!
+    species: String!
+    color: String!
+
+    isAlive: Boolean!
+
+    # игровые показатели (ТОЛЬКО чтение)
+    health: Int!
+    hunger: Int!
+    happiness: Int!
+    energy: Int!
+    clearliness: Int!
+
+    birthDate: Date
+    createdAt: DateTime
+    updatedAt: DateTime
+
+    owner: Owner!
+}
+
+# ---------------------------------------------------------------------------
+# Пагинация
+# ---------------------------------------------------------------------------
+
+type TamagochiConnection {
+    content: [Tamagochi!]!
+    pageInfo: PageInfo!
+    totalElements: Int!
+}
+
+type OwnerConnection {
+    content: [Owner!]!
+    pageInfo: PageInfo!
+    totalElements: Int!
+}
+
+type PageInfo {
+    pageNumber: Int!
+    pageSize: Int!
+    totalPages: Int!
+    last: Boolean!
+}
+
+# ---------------------------------------------------------------------------
+# Input типы (ТОЛЬКО безопасные поля)
+# ---------------------------------------------------------------------------
+
+input CreateOwnerInput {
+    name: String!
+    birthDate: Date!
+}
+
+input UpdateOwnerInput {
+    name: String!
+    birthDate: Date!
+}
+
+input CreateTamagochiInput {
+    name: String!
+    species: String!
+    color: String!
+    ownerId: ID!
+}
+
+input UpdateTamagochiInput {
+    name: String
+    species: String
+    color: String
+}
+
+input TamagochiFilter {
+    ownerId: ID
+    species: String
+    isAlive: Boolean
+    nameSearch: String
+}
+
+# ---------------------------------------------------------------------------
+# Query
+# ---------------------------------------------------------------------------
+
+type Query {
+    owner(id: ID!): Owner
+    owners(page: Int = 0, size: Int = 20): OwnerConnection!
+
+    tamagochi(id: ID!): Tamagochi
+    tamagochis(filter: TamagochiFilter, page: Int = 0, size: Int = 20): TamagochiConnection!
+}
+
+# ---------------------------------------------------------------------------
+# Mutation (вся игровая логика здесь)
+# ---------------------------------------------------------------------------
+
+type Mutation {
+    # CRUD
+    createOwner(input: CreateOwnerInput!): Owner!
+    updateOwner(id: ID!, input: UpdateOwnerInput!): Owner!
+    deleteOwner(id: ID!): Boolean!
+
+    createTamagochi(input: CreateTamagochiInput!): Tamagochi!
+    updateTamagochi(id: ID!, input: UpdateTamagochiInput!): Tamagochi!
+    deleteTamagochi(id: ID!): Boolean!
+
+    # игровые действия (ВАЖНО)
+    feedTamagochi(id: ID!): Tamagochi!
+    playWithTamagochi(id: ID!): Tamagochi!
+    sleepTamagochi(id: ID!): Tamagochi!
+    cleanTamagochi(id: ID!): Tamagochi!
+}

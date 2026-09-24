@@ -1,0 +1,55 @@
+// Контракт gRPC-сервиса аналитики тамагочи
+//
+// Определяет сервис TamagochiAnalytics с одним RPC-методом AnalyzeTamagochi.
+// Из этого файла protoc + protoc-gen-grpc-java генерируют:
+// - Классы сообщений: AnalyzeTamagochiRequest, TamagochiAnalysisResponse
+// - Серверный базовый класс: TamagochiAnalyticsGrpc.TamagochiAnalyticsImplBase
+// - Клиентские стабы: TamagochiAnalyticsGrpc.TamagochiAnalyticsBlockingStub
+
+syntax = "proto3";
+
+// Java-пакет для сгенерированных классов
+option java_package = "com.example.tamagochi.grpc";
+
+// Все сгенерированные классы будут в отдельных файлах (не во вложенных классах)
+option java_multiple_files = true;
+
+// Пакет proto (для именования в других .proto файлах при импорте)
+package tamagochianalytics;
+
+// Сервис
+// Unary RPC - один запрос = один ответ (аналог REST GET/POST)
+service TamagochiAnalytics {
+
+    // Анализирует тамагочи и возвращает вычисленные метрики
+    rpc AnalyzeTamagochi (AnalyzeTamagochiRequest) returns (TamagochiAnalysisResponse);
+}
+
+// Сообщения
+// В proto3 все поля опциональны по умолчанию (zero-value = не задано).
+// Номера полей (1, 2, 3...) используются в бинарном формате —
+// они не должны меняться после релиза, чтобы не нарушить совместимость
+
+// Запрос на анализ тамагочи — данные, необходимые для вычисления метрик.
+message AnalyzeTamagochiRequest {
+    int64  tamagochi_id  = 1;  // ID тамагочи в системе
+    string name          = 2;  // Имя тамагочи
+    string species       = 3;  // Вид (Кошка, Собака, Дракон...)
+    int32  health        = 4;  // Здоровье (0-100)
+    int32  hunger        = 5;  // Голод (0-100)
+    int32  happiness     = 6;  // Счастье (0-100)
+    int32  cleanliness   = 7;  // Чистота (0-100)
+    int32  energy        = 8;  // Энергия (0-100)
+    int32  days_alive    = 9;  // Количество дней жизни
+    bool   is_alive      = 10; // Статус жизни
+}
+
+// Ответ с результатами анализа — вычисленные метрики тамагочи.
+message TamagochiAnalysisResponse {
+    int64  tamagochi_id              = 1;  // ID тамагочи (echo back)
+    string overall_condition         = 2;  // Общее состояние: EXCELLENT, GOOD, FAIR, POOR, CRITICAL
+    int32  wellbeing_score           = 3;  // Балл благополучия (0-100)
+    string care_level                = 4;  // Уровень ухода: NEGLECTED, BASIC, GOOD, EXCELLENT
+    int32  days_alive                = 5;  // Дни жизни
+    string lifestage_classification  = 6;  // Стадия жизни: BABY, CHILD, TEEN, ADULT, ELDER
+}
