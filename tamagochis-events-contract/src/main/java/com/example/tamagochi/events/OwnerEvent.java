@@ -1,5 +1,7 @@
 package com.example.tamagochi.events;
 
+import java.util.UUID;
+
 /**
  * Семейство событий, связанных с владельцами тамагочи.
  *
@@ -12,7 +14,7 @@ public sealed interface OwnerEvent {
      * Владелец создан. Содержит основные атрибуты нового владельца.
      */
     record Created(
-            Long ownerId,
+            UUID ownerId,
             String name
     ) implements OwnerEvent {}
 
@@ -20,7 +22,7 @@ public sealed interface OwnerEvent {
      * Владелец удалён. В системе удаление каскадное — вместе с тамагочи.
      */
     record Deleted(
-            Long ownerId,
+            UUID ownerId,
             String name,
             int deletedTamagochisCount
     ) implements OwnerEvent {}

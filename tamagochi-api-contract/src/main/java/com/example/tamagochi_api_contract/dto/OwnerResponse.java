@@ -9,17 +9,18 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Builder
-@EqualsAndHashCode(callSuper = false) // не включаем HATEOAS-ссылки в сравнение equals
+@EqualsAndHashCode(callSuper = false)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Relation(collectionRelation = "owners", itemRelation = "owner")
 @Schema(description = "Информация о пользователе")
 public class OwnerResponse extends RepresentationModel<OwnerResponse> {
 
-    @Schema(description = "Уникальный идентификатор пользователя", example = "1")
-    private final Long id;
+    @Schema(description = "Уникальный идентификатор пользователя")
+    private final UUID id;
 
     @Schema(description = "Имя пользователя", example = "Мегакрут")
     private final String name;

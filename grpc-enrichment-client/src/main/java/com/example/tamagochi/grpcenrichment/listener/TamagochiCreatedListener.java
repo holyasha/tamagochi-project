@@ -16,6 +16,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 
 /**
  * Слушатель событий tamagochi.created из RabbitMQ.
@@ -68,14 +69,14 @@ public class TamagochiCreatedListener {
 
             // 2. Формируем gRPC-запрос
             AnalyzeTamagochiRequest grpcRequest = AnalyzeTamagochiRequest.newBuilder()
-                    .setTamagochiId(tamagochiCreated.tamagochiId())
+                    .setTamagochiId(tamagochiCreated.tamagochiId().toString())
                     .setName(tamagochiCreated.name() != null ? tamagochiCreated.name() : "")
                     .setSpecies(tamagochiCreated.species() != null ? tamagochiCreated.species() : "")
-                    .setHealth(100)        // Новый тамагочи начинает со 100% здоровья
-                    .setHunger(50)         // Средний голод
-                    .setHappiness(80)      // Счастливый новорожденный
-                    .setCleanliness(100)   // Чистый
-                    .setEnergy(100)        // Полная энергия
+                    .setHealth(100)
+                    .setHunger(50)
+                    .setHappiness(80)
+                    .setCleanliness(100)
+                    .setEnergy(100)
                     .setDaysAlive(daysAlive)
                     .setIsAlive(true)
                     .build();
@@ -93,7 +94,7 @@ public class TamagochiCreatedListener {
 
             // 4. Публикуем событие tamagochi.enriched
             TamagochiEvent.Enriched enrichedEvent = new TamagochiEvent.Enriched(
-                    grpcResponse.getTamagochiId(),
+                    UUID.fromString(grpcResponse.getTamagochiId()),
                     tamagochiCreated.name(),
                     grpcResponse.getOverallCondition(),
                     grpcResponse.getWellbeingScore(),

@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 /**
  * Публикация доменных событий тамагочи в RabbitMQ.
  *
@@ -69,7 +71,7 @@ public class TamagochiEventPublisher {
     /**
      * Публикует событие «тамагочи удалён».
      */
-    public void publishDeleted(Long tamagochiId, String name, String reason) {
+    public void publishDeleted(UUID tamagochiId, String name, String reason) {
         var event = new TamagochiEvent.Deleted(tamagochiId, name, reason);
         send(RoutingKeys.TAMAGOCHI_DELETED, event);
     }
@@ -77,7 +79,7 @@ public class TamagochiEventPublisher {
     /**
      * Публикует событие «тамагочи покормлен».
      */
-    public void publishFed(Long tamagochiId, String name, int hungerBefore, int hungerAfter, int healthAfter) {
+    public void publishFed(UUID tamagochiId, String name, int hungerBefore, int hungerAfter, int healthAfter) {
         var event = new TamagochiEvent.Fed(tamagochiId, name, hungerBefore, hungerAfter, healthAfter);
         send(RoutingKeys.TAMAGOCHI_FED, event);
     }
@@ -85,7 +87,7 @@ public class TamagochiEventPublisher {
     /**
      * Публикует событие «с тамагочи поиграли».
      */
-    public void publishPlayed(Long tamagochiId, String name, int happinessBefore, int happinessAfter, int energyAfter) {
+    public void publishPlayed(UUID tamagochiId, String name, int happinessBefore, int happinessAfter, int energyAfter) {
         var event = new TamagochiEvent.Played(tamagochiId, name, happinessBefore, happinessAfter, energyAfter);
         send(RoutingKeys.TAMAGOCHI_PLAYED, event);
     }
@@ -93,7 +95,7 @@ public class TamagochiEventPublisher {
     /**
      * Публикует событие «тамагочи вылечен».
      */
-    public void publishHealed(Long tamagochiId, String name, int healthBefore, int healthAfter) {
+    public void publishHealed(UUID tamagochiId, String name, int healthBefore, int healthAfter) {
         var event = new TamagochiEvent.Healed(tamagochiId, name, healthBefore, healthAfter);
         send(RoutingKeys.TAMAGOCHI_HEALED, event);
     }
@@ -101,7 +103,7 @@ public class TamagochiEventPublisher {
     /**
      * Публикует событие «тамагочи очищен».
      */
-    public void publishCleaned(Long tamagochiId, String name, int cleanlinessBefore, int cleanlinessAfter) {
+    public void publishCleaned(UUID tamagochiId, String name, int cleanlinessBefore, int cleanlinessAfter) {
         var event = new TamagochiEvent.Cleaned(tamagochiId, name, cleanlinessBefore, cleanlinessAfter);
         send(RoutingKeys.TAMAGOCHI_CLEANED, event);
     }
@@ -109,7 +111,7 @@ public class TamagochiEventPublisher {
     /**
      * Публикует событие «тамагочи отдохнул».
      */
-    public void publishRested(Long tamagochiId, String name, int energyBefore, int energyAfter) {
+    public void publishRested(UUID tamagochiId, String name, int energyBefore, int energyAfter) {
         var event = new TamagochiEvent.Rested(tamagochiId, name, energyBefore, energyAfter);
         send(RoutingKeys.TAMAGOCHI_RESTED, event);
     }

@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -45,7 +46,7 @@ public interface TamagochiApi {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     @GetMapping("/{id}")
     EntityModel<TamagochiResponse> getTamagochiById(
-            @Parameter(description = "ID питомца", required = true, example = "1") @PathVariable Long id
+            @Parameter(description = "ID питомца", required = true) @PathVariable UUID id
     );
 
     @Operation(
@@ -60,7 +61,7 @@ public interface TamagochiApi {
     @ApiResponse(responseCode = "200", description = "Постраничный список питомцев")
     @GetMapping
     PagedModel<EntityModel<TamagochiResponse>> getAllTamagochis(
-            @Parameter(description = "Фильтр по ID владельца") @RequestParam(required = false) Long ownerId,
+            @Parameter(description = "Фильтр по ID владельца") @RequestParam(required = false) UUID ownerId,
             @Parameter(description = "Фильтр по цвету", example = "Серый") @RequestParam(required = false) String color,
             @Parameter(description = "Фильтр по виду питомца", example = "Кошка") @RequestParam(required = false) String species,
             @Parameter(description = "Поиск по имени (substring, case-insensitive)", example = "Чупеп") @RequestParam(required = false) String nameSearch,
@@ -95,7 +96,7 @@ public interface TamagochiApi {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     EntityModel<TamagochiResponse> updateTamagochi(
-            @Parameter(description = "ID питомца", required = true, example = "1") @PathVariable Long id,
+            @Parameter(description = "ID питомца", required = true) @PathVariable UUID id,
             @Valid @RequestBody UpdateTamagochiRequest request
     );
 
@@ -114,7 +115,7 @@ public interface TamagochiApi {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     EntityModel<TamagochiResponse> patchTamagochi(
-            @Parameter(description = "ID питомца", required = true, example = "1") @PathVariable Long id,
+            @Parameter(description = "ID питомца", required = true) @PathVariable UUID id,
             @Valid @RequestBody PatchTamagochiRequest request
     );
 
@@ -128,8 +129,7 @@ public interface TamagochiApi {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteTamagochi(
-            @Parameter(description = "ID питомца", required = true, example = "1") @PathVariable Long id
+            @Parameter(description = "ID питомца", required = true) @PathVariable UUID id
     );
 }
 
-  

@@ -1,6 +1,7 @@
 package com.example.tamagochirest.graphql.fetcher;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import com.example.tamagochi_api_contract.dto.PagedResponse;
 import com.example.tamagochi_api_contract.dto.TamagochiRequest;
@@ -29,7 +30,7 @@ import com.netflix.graphql.dgs.InputArgument;
  */
 @DgsComponent
 public class TamagochiDataFetcher {
-    
+
     private final TamagochiService tamagochiService;
 
     public TamagochiDataFetcher(TamagochiService tamagochiService) {
@@ -43,7 +44,7 @@ public class TamagochiDataFetcher {
      */
     @DgsQuery
     public TamagochiResponse tamagochi(@InputArgument String id) {
-        return tamagochiService.findTamagochiById(Long.parseLong(id));
+        return tamagochiService.findTamagochiById(UUID.fromString(id));
     }
 
     /**
@@ -59,26 +60,23 @@ public class TamagochiDataFetcher {
             @InputArgument Integer page,
             @InputArgument Integer size) {
 
-        // Подставляем значения по умолчанию, если клиент не передал аргументы
         int pageNum = page != null ? page : 0;
         int pageSize = size != null ? size : 20;
 
-        // Извлекаем параметры фильтрации
-        Long ownerId = null;
+        UUID ownerId = null;
         String species = null;
         String color = null;
         String nameSearch = null;
         LocalDate birthDate = null;
 
         if (filter != null) {
-            ownerId = filter.ownerId() != null ? Long.parseLong(filter.ownerId()) : null;
+            ownerId = filter.ownerId() != null ? UUID.fromString(filter.ownerId()) : null;
             species = filter.species();
             color = filter.color();
             birthDate = filter.birthDate();
             nameSearch = filter.nameSearch();
         }
 
-        // Переиспользуем существующий сервисный слой — GraphQL не дублирует бизнес-логику
         PagedResponse<TamagochiResponse> paged = tamagochiService.findAllTamagochis(
                 ownerId, species, color, nameSearch, birthDate, pageNum, pageSize);
 
@@ -98,7 +96,7 @@ public class TamagochiDataFetcher {
                 input.name(),
                 input.species(),
                 input.color(),
-                Long.parseLong(input.ownerId()),
+                UUID.fromString(input.ownerId()),
                 input.birthDate()
         );
         return tamagochiService.createTamagochi(request);
@@ -116,7 +114,7 @@ public class TamagochiDataFetcher {
                 input.color(),
                 input.birthDate()
         );
-        return tamagochiService.updaTamagochi(Long.parseLong(id), request);
+        return tamagochiService.updaTamagochi(UUID.fromString(id), request);
     }
 
     /**
@@ -126,7 +124,7 @@ public class TamagochiDataFetcher {
      */
     @DgsMutation
     public boolean deleteTamagochi(@InputArgument String id) {
-        tamagochiService.deleteTamagochi(Long.parseLong(id));
+        tamagochiService.deleteTamagochi(UUID.fromString(id));
         return true;
     }
 }

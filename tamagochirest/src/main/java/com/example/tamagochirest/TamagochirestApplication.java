@@ -2,14 +2,14 @@ package com.example.tamagochirest;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 
 @SpringBootApplication(
-	scanBasePackages = {"com.example.tamagochirest", "com.example.tamagochi_api_contract", "com.example.events"},
-	exclude = {DataSourceAutoConfiguration.class}
+	scanBasePackages = {"com.example.tamagochirest", "com.example.tamagochi_api_contract", "com.example.events"}
 )
 @EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
+@EnableJpaRepositories(basePackages = "com.example.tamagochirest.repository")
 public class TamagochirestApplication {
 
 	public static void main(String[] args) {

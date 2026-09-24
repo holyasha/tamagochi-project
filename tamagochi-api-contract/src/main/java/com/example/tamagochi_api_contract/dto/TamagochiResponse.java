@@ -10,6 +10,7 @@ import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
@@ -22,8 +23,8 @@ import org.springframework.hateoas.server.core.Relation;
 @Schema(description = "Информация о питомце")
 public class TamagochiResponse extends RepresentationModel<TamagochiResponse> {
 
-    @Schema(description = "Уникальный идентификатор питомца", example = "1")
-    private final Long id;
+    @Schema(description = "Уникальный идентификатор питомца")
+    private final UUID id;
 
     @Schema(description = "Имя питомца", example = "Чупеп")
     private final String name;

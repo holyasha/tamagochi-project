@@ -22,6 +22,8 @@ import com.example.tamagochi_api_contract.dto.OwnerResponse;
 import com.example.tamagochi_api_contract.dto.PatchOwnerRequest;
 import com.example.tamagochi_api_contract.dto.TamagochiResponse;
 
+import java.util.UUID;
+
 /**
  * Контракт API для управления пользователями.
  * Реализующий контроллер в сервисе должен имплементировать этот интерфейс.
@@ -57,7 +59,7 @@ public interface OwnerApi {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     @GetMapping("/{id}")
     EntityModel<OwnerResponse> getOwnerById(
-            @Parameter(description = "ID владельца", required = true, example = "1") @PathVariable Long id
+            @Parameter(description = "ID владельца", required = true) @PathVariable UUID id
     );
 
     @Operation(
@@ -83,7 +85,7 @@ public interface OwnerApi {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     EntityModel<OwnerResponse> updateOwner(
-            @Parameter(description = "ID владельца", required = true, example = "1") @PathVariable Long id,
+            @Parameter(description = "ID владельца", required = true) @PathVariable UUID id,
             @Valid @RequestBody OwnerRequest request
     );
 
@@ -102,7 +104,7 @@ public interface OwnerApi {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     EntityModel<OwnerResponse> patchOwner(
-            @Parameter(description = "ID владельца", required = true, example = "1") @PathVariable Long id,
+            @Parameter(description = "ID владельца", required = true) @PathVariable UUID id,
             @Valid @RequestBody PatchOwnerRequest request
     );
 
@@ -117,7 +119,7 @@ public interface OwnerApi {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteOwner(
-            @Parameter(description = "ID владельца", required = true, example = "1") @PathVariable Long id
+            @Parameter(description = "ID владельца", required = true) @PathVariable UUID id
     );
 
     @Operation(
@@ -134,7 +136,7 @@ public interface OwnerApi {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     @GetMapping("/{id}/tamagochis")
     PagedModel<EntityModel<TamagochiResponse>> getTamagochisByOwner(
-            @Parameter(description = "ID владельца", required = true, example = "1") @PathVariable Long id,
+            @Parameter(description = "ID владельца", required = true) @PathVariable UUID id,
             @Parameter(description = "Номер страницы (0..N)", example = "0") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Размер страницы", example = "20") @RequestParam(defaultValue = "20") int size
     );

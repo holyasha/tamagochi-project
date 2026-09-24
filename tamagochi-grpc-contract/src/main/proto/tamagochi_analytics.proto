@@ -32,7 +32,7 @@ service TamagochiAnalytics {
 
 // Запрос на анализ тамагочи — данные, необходимые для вычисления метрик.
 message AnalyzeTamagochiRequest {
-    int64  tamagochi_id  = 1;  // ID тамагочи в системе
+    string tamagochi_id  = 1;  // ID тамагочи в системе (UUID как строка)
     string name          = 2;  // Имя тамагочи
     string species       = 3;  // Вид (Кошка, Собака, Дракон...)
     int32  health        = 4;  // Здоровье (0-100)
@@ -46,7 +46,7 @@ message AnalyzeTamagochiRequest {
 
 // Ответ с результатами анализа — вычисленные метрики тамагочи.
 message TamagochiAnalysisResponse {
-    int64  tamagochi_id              = 1;  // ID тамагочи (echo back)
+    string tamagochi_id              = 1;  // ID тамагочи (UUID как строка)
     string overall_condition         = 2;  // Общее состояние: EXCELLENT, GOOD, FAIR, POOR, CRITICAL
     int32  wellbeing_score           = 3;  // Балл благополучия (0-100)
     string care_level                = 4;  // Уровень ухода: NEGLECTED, BASIC, GOOD, EXCELLENT

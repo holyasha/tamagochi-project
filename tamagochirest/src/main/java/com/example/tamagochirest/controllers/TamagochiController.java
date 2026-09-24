@@ -1,6 +1,7 @@
 package com.example.tamagochirest.controllers;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -9,6 +10,7 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.tamagochi_api_contract.api.TamagochiApi;
@@ -24,11 +26,11 @@ import jakarta.validation.Valid;
 
 @RestController
 public class TamagochiController implements TamagochiApi{
-    
+
     private final TamagochiService tamagochiService;
     private final TamagochiModelAssembler tamagochiModelAssembler;
     private final PagedResourcesAssembler<TamagochiResponse> pagedResourcesAssembler;
-    
+
     public TamagochiController(TamagochiService tamagochiService, TamagochiModelAssembler tamagochiModelAssembler,
             PagedResourcesAssembler<TamagochiResponse> pagedResourcesAssembler) {
         this.tamagochiService = tamagochiService;
@@ -37,12 +39,14 @@ public class TamagochiController implements TamagochiApi{
     }
 
     @Override
-    public EntityModel<TamagochiResponse> getTamagochiById(Long id) {
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public EntityModel<TamagochiResponse> getTamagochiById(UUID id) {
         return tamagochiModelAssembler.toModel(tamagochiService.findTamagochiById(id));
     }
 
     @Override
-    public PagedModel<EntityModel<TamagochiResponse>> getAllTamagochis(Long ownerId, String color, String species,
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public PagedModel<EntityModel<TamagochiResponse>> getAllTamagochis(UUID ownerId, String color, String species,
             String nameSearch, LocalDate birthDate, int page, int size) {
         PagedResponse<TamagochiResponse> paged = tamagochiService.findAllTamagochis(ownerId, species, color, nameSearch, birthDate, page, size);
         Page<TamagochiResponse> springPage = new PageImpl<>(
@@ -54,6 +58,7 @@ public class TamagochiController implements TamagochiApi{
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EntityModel<TamagochiResponse>> createTamagochi(@Valid TamagochiRequest request) {
         TamagochiResponse created = tamagochiService.createTamagochi(request);
         EntityModel<TamagochiResponse> model = tamagochiModelAssembler.toModel(created);
@@ -63,21 +68,24 @@ public class TamagochiController implements TamagochiApi{
     }
 
     @Override
-    public EntityModel<TamagochiResponse> updateTamagochi(Long id, @Valid UpdateTamagochiRequest request) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public EntityModel<TamagochiResponse> updateTamagochi(UUID id, @Valid UpdateTamagochiRequest request) {
         return tamagochiModelAssembler.toModel(tamagochiService.updaTamagochi(id, request));
     }
 
     @Override
-    public EntityModel<TamagochiResponse> patchTamagochi(Long id, @Valid PatchTamagochiRequest request) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public EntityModel<TamagochiResponse> patchTamagochi(UUID id, @Valid PatchTamagochiRequest request) {
         return tamagochiModelAssembler.toModel(tamagochiService.patcTamagochi(id, request));
     }
 
     @Override
-    public void deleteTamagochi(Long id) {
-        tamagochiService.deleteTamagochi(id);        
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deleteTamagochi(UUID id) {
+        tamagochiService.deleteTamagochi(id);
     }
 
-    
-    
-    
+
+
+
 }

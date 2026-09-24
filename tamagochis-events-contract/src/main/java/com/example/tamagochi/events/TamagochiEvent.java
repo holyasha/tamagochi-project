@@ -1,6 +1,7 @@
 package com.example.tamagochi.events;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 /**
  * Семейство событий, связанных с тамагочи.
@@ -19,12 +20,12 @@ public sealed interface TamagochiEvent {
      * Тамагочи создан. Содержит все ключевые атрибуты нового питомца.
      */
     record Created(
-            Long tamagochiId,
+            UUID tamagochiId,
             String name,
             String species,
             String color,
             LocalDate birthDate,
-            Long ownerId,
+            UUID ownerId,
             String ownerName
     ) implements TamagochiEvent {}
 
@@ -32,7 +33,7 @@ public sealed interface TamagochiEvent {
      * Тамагочи обновлён. Содержит актуальное состояние после обновления.
      */
     record Updated(
-            Long tamagochiId,
+            UUID tamagochiId,
             String name,
             String species,
             String color,
@@ -48,7 +49,7 @@ public sealed interface TamagochiEvent {
      * Тамагочи удалён (умер или удалён владельцем).
      */
     record Deleted(
-            Long tamagochiId,
+            UUID tamagochiId,
             String name,
             String reason
     ) implements TamagochiEvent {}
@@ -57,7 +58,7 @@ public sealed interface TamagochiEvent {
      * Тамагочи покормлен. Событие фиксирует действие кормления.
      */
     record Fed(
-            Long tamagochiId,
+            UUID tamagochiId,
             String name,
             Integer hungerBefore,
             Integer hungerAfter,
@@ -68,7 +69,7 @@ public sealed interface TamagochiEvent {
      * С тамагочи поиграли. Событие фиксирует игровую активность.
      */
     record Played(
-            Long tamagochiId,
+            UUID tamagochiId,
             String name,
             Integer happinessBefore,
             Integer happinessAfter,
@@ -79,7 +80,7 @@ public sealed interface TamagochiEvent {
      * Тамагочи вылечен. Событие фиксирует лечение питомца.
      */
     record Healed(
-            Long tamagochiId,
+            UUID tamagochiId,
             String name,
             Integer healthBefore,
             Integer healthAfter
@@ -89,7 +90,7 @@ public sealed interface TamagochiEvent {
      * Тамагочи искупан/очищен.
      */
     record Cleaned(
-            Long tamagochiId,
+            UUID tamagochiId,
             String name,
             Integer cleanlinessBefore,
             Integer cleanlinessAfter
@@ -99,7 +100,7 @@ public sealed interface TamagochiEvent {
      * Тамагочи спит/отдыхает.
      */
     record Rested(
-            Long tamagochiId,
+            UUID tamagochiId,
             String name,
             Integer energyBefore,
             Integer energyAfter
@@ -112,7 +113,7 @@ public sealed interface TamagochiEvent {
      * от grpc-analytics-server. Содержит вычисленные метрики тамагочи.
      */
     record Enriched(
-            Long tamagochiId,
+            UUID tamagochiId,
             String name,
             String overallCondition,
             Integer wellbeingScore,

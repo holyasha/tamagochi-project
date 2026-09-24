@@ -11,6 +11,9 @@ import com.netflix.graphql.dgs.DgsComponent;
 import com.netflix.graphql.dgs.DgsMutation;
 import com.netflix.graphql.dgs.DgsQuery;
 import com.netflix.graphql.dgs.InputArgument;
+
+import java.util.UUID;
+
 /**
  * DataFetcher для операций с владельцами.
  *
@@ -34,7 +37,7 @@ public class OwnerDataFetcher {
      */
     @DgsQuery
     public OwnerResponse owner(@InputArgument String id) {
-        return ownerService.findById(Long.parseLong(id));
+        return ownerService.findById(UUID.fromString(id));
     }
 
     /**

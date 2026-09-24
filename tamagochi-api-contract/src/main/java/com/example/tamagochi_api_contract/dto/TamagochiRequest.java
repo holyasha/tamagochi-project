@@ -1,6 +1,7 @@
 package com.example.tamagochi_api_contract.dto;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
@@ -22,9 +23,9 @@ public record TamagochiRequest(
     @Size(max = 100, message = "Цвет не может превышать 100 символов")
     String color,
 
-    @Schema(description = "ID владельца", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "ID владельца", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "ID владельца не может быть пустым")
-    Long ownerId,
+    UUID ownerId,
 
     @Schema(description = "Дата рождения питомца", example = "2026-04-18", requiredMode = Schema.RequiredMode.REQUIRED)
     @Past(message = "Дата рождения должна быть в прошлом")
