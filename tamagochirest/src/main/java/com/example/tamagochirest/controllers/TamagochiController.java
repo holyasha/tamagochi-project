@@ -39,13 +39,13 @@ public class TamagochiController implements TamagochiApi{
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SERVICE', 'OPERATOR')")
     public EntityModel<TamagochiResponse> getTamagochiById(UUID id) {
         return tamagochiModelAssembler.toModel(tamagochiService.findTamagochiById(id));
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SERVICE', 'OPERATOR')")
     public PagedModel<EntityModel<TamagochiResponse>> getAllTamagochis(UUID ownerId, String color, String species,
             String nameSearch, LocalDate birthDate, int page, int size) {
         PagedResponse<TamagochiResponse> paged = tamagochiService.findAllTamagochis(ownerId, species, color, nameSearch, birthDate, page, size);
@@ -58,7 +58,7 @@ public class TamagochiController implements TamagochiApi{
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('OPERATOR')")
     public ResponseEntity<EntityModel<TamagochiResponse>> createTamagochi(@Valid TamagochiRequest request) {
         TamagochiResponse created = tamagochiService.createTamagochi(request);
         EntityModel<TamagochiResponse> model = tamagochiModelAssembler.toModel(created);
@@ -68,19 +68,19 @@ public class TamagochiController implements TamagochiApi{
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('OPERATOR')")
     public EntityModel<TamagochiResponse> updateTamagochi(UUID id, @Valid UpdateTamagochiRequest request) {
         return tamagochiModelAssembler.toModel(tamagochiService.updaTamagochi(id, request));
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('OPERATOR')")
     public EntityModel<TamagochiResponse> patchTamagochi(UUID id, @Valid PatchTamagochiRequest request) {
         return tamagochiModelAssembler.toModel(tamagochiService.patcTamagochi(id, request));
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('OPERATOR')")
     public void deleteTamagochi(UUID id) {
         tamagochiService.deleteTamagochi(id);
     }

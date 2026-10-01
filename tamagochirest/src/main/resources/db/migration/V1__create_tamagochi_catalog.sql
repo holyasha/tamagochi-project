@@ -1,4 +1,3 @@
--- Таблица владельцев тамагочи
 CREATE TABLE owners (
     id UUID PRIMARY KEY,
     name VARCHAR(200) NOT NULL,
@@ -7,7 +6,6 @@ CREATE TABLE owners (
     version BIGINT NOT NULL DEFAULT 0
 );
 
--- Таблица тамагочи
 CREATE TABLE tamagochis (
     id UUID PRIMARY KEY,
     name VARCHAR(200) NOT NULL,
@@ -25,8 +23,3 @@ CREATE TABLE tamagochis (
     version BIGINT NOT NULL DEFAULT 0
 );
 
--- Индекс для быстрого поиска тамагочи по владельцу
-CREATE INDEX idx_tamagochis_owner_id ON tamagochis(owner_id);
-
--- Индекс для поиска живых тамагочи
-CREATE INDEX idx_tamagochis_is_alive ON tamagochis(is_alive);

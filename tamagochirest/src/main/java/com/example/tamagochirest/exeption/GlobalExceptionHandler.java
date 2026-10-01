@@ -69,6 +69,21 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    @ExceptionHandler(org.springframework.security.authorization.AuthorizationDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(org.springframework.security.authorization.AuthorizationDeniedException ex, HttpServletRequest req) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse(
+                        HttpStatus.FORBIDDEN.value(),
+                        BASE_PROBLEM_URI + "access-denied",
+                        "Доступ запрещен",
+                        "У вас недостаточно прав для выполнения этой операции.",
+                        req.getRequestURI(),
+                        Instant.now(),
+                        null
+                ));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAll(Exception ex, HttpServletRequest req) {
         // Место для логирования: log.error("Unexpected error", ex);

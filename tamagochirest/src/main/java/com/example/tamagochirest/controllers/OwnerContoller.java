@@ -45,7 +45,7 @@ public class OwnerContoller implements OwnerApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SERVICE', 'OPERATOR')")
     public PagedModel<EntityModel<OwnerResponse>> getAllOwners(int page, int size) {
         PagedResponse<OwnerResponse> paged = ownerService.findAll(page, size);
         Page<OwnerResponse> springPage = new PageImpl<>(
@@ -57,13 +57,13 @@ public class OwnerContoller implements OwnerApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SERVICE', 'OPERATOR')")
     public EntityModel<OwnerResponse> getOwnerById(UUID id) {
         return ownerModelAssembler.toModel(ownerService.findById(id));
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('OPERATOR')")
     public ResponseEntity<EntityModel<OwnerResponse>> createOwner(OwnerRequest request) {
         OwnerResponse created = ownerService.create(request);
         EntityModel<OwnerResponse> model = ownerModelAssembler.toModel(created);
@@ -73,25 +73,25 @@ public class OwnerContoller implements OwnerApi {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('OPERATOR')")
     public EntityModel<OwnerResponse> updateOwner(UUID id, OwnerRequest request) {
         return ownerModelAssembler.toModel(ownerService.update(id, request));
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('OPERATOR')")
     public EntityModel<OwnerResponse> patchOwner(UUID id, PatchOwnerRequest request) {
         return ownerModelAssembler.toModel(ownerService.patchOwner(id, request));
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('OPERATOR')")
     public void deleteOwner(UUID id) {
         ownerService.delete(id);
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SERVICE', 'OPERATOR')")
     public PagedModel<EntityModel<TamagochiResponse>> getTamagochisByOwner(UUID id, int page, int size) {
         ownerService.findById(id);
         PagedResponse<TamagochiResponse> paged = tamagotchiService.findAllTamagochis(id, null, null, null, null, page, size);

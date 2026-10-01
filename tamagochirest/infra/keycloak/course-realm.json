@@ -1,0 +1,152 @@
+{
+  "realm": "course",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "accessTokenLifespan": 300,
+  "roles": {
+    "realm": [
+      {
+        "name": "user"
+      },
+      {
+        "name": "admin"
+      },
+      {
+        "name": "service"
+      },
+      {
+        "name": "operator"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "tamagochi-service-client",
+      "protocol": "openid-connect",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "tamagochi-service-secret",
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "fullScopeAllowed": false,
+      "defaultClientScopes": [
+        "roles"
+      ],
+      "protocolMappers": [
+        {
+          "name": "api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "recommendation-service",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "tamagochi-admin-client",
+      "protocol": "openid-connect",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "tamagochi-admin-secret",
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "fullScopeAllowed": false,
+      "defaultClientScopes": [
+        "roles"
+      ],
+      "protocolMappers": [
+        {
+          "name": "api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "recommendation-service",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "tamagochi-user-client",
+      "protocol": "openid-connect",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "tamagochi-user-secret",
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "fullScopeAllowed": false,
+      "defaultClientScopes": [
+        "roles"
+      ],
+      "protocolMappers": [
+        {
+          "name": "api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "recommendation-service",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "scopeMappings": [
+    {
+      "client": "tamagochi-service-client",
+      "roles": [
+        "service"
+      ]
+    },
+    {
+      "client": "tamagochi-admin-client",
+      "roles": [
+        "admin"
+      ]
+    },
+    {
+      "client": "tamagochi-user-client",
+      "roles": [
+        "user"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "service-account-tamagochi-service-client",
+      "enabled": true,
+      "serviceAccountClientId": "tamagochi-service-client",
+      "realmRoles": [
+        "service"
+      ]
+    },
+    {
+      "username": "service-account-tamagochi-admin-client",
+      "enabled": true,
+      "serviceAccountClientId": "tamagochi-admin-client",
+      "realmRoles": [
+        "admin"
+      ]
+    },
+    {
+      "username": "service-account-tamagochi-user-client",
+      "enabled": true,
+      "serviceAccountClientId": "tamagochi-user-client",
+      "realmRoles": [
+        "user"
+      ]
+    }
+  ]
+}

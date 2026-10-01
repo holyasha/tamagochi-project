@@ -16,5 +16,22 @@ services:
       timeout: 5s
       retries: 5
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3.2
+    container_name: tamagochi-keycloak
+    command: ["start-dev", "--import-realm", "--health-enabled=true"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin-dev-only
+    ports:
+      - "8085:8080"
+    volumes:
+      - ./infra/keycloak/course-realm.json:/opt/keycloak/data/import/course-realm.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
 volumes:
   tamagochi-postgres-data:
