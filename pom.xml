@@ -45,6 +45,7 @@
         <module>grpc-analytics-server</module>
         <module>grpc-enrichment-client</module>
         <module>notification-service</module>
+        <module>gateway-service</module>
     </modules>
 
 </project>
