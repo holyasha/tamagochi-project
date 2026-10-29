@@ -80,9 +80,71 @@ services:
       - tamagochi-grafana-data:/var/lib/grafana
     depends_on:
       - tempo
+      - loki
+
+  prometheus:
+    image: prom/prometheus:v3.1.0
+    container_name: tamagochi-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--enable-feature=exemplar-storage'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./infra/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - tamagochi-prometheus-data:/prometheus
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  loki:
+    image: grafana/loki:3.3.2
+    container_name: tamagochi-loki
+    command: ["-config.file=/etc/loki/local-config.yaml"]
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./infra/loki/loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - tamagochi-loki-data:/loki
+
+  alloy:
+    image: grafana/alloy:v1.5.1
+    container_name: tamagochi-alloy
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    ports:
+      - "12345:12345"
+    volumes:
+      - ./infra/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - ./runtime-logs:/var/log/course-apps:ro
+    depends_on:
+      - loki
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    container_name: tamagochi-alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./infra/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - tamagochi-alertmanager-data:/alertmanager
+    depends_on:
+      - prometheus
 
 volumes:
   tamagochi-postgres-data:
   tamagochi-redis-data:
   tamagochi-tempo-data:
   tamagochi-grafana-data:
+  tamagochi-prometheus-data:
+  tamagochi-loki-data:
+  tamagochi-alertmanager-data:

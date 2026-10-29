@@ -19,6 +19,8 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/actuator/health", "/actuator/health/**", "/livez", "/readyz").permitAll()
+                        .requestMatchers("/internal/diagnostic/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(csrf -> csrf.disable())
@@ -31,5 +33,10 @@ public class SecurityConfig {
                             response.getWriter().write("{\"status\":401,\"error\":\"Unauthorized\",\"message\":\"Authentication required\"}");
                         }));
         return http.build();
+    }
+
+    @Bean
+    DiagnosticMode diagnosticMode() {
+        return new DiagnosticMode();
     }
 }

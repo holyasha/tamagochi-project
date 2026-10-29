@@ -1,15 +1,21 @@
 package com.example.tamagochirest.service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.example.tamagochi_api_contract.dto.OwnerResponse;
 import com.example.tamagochi_api_contract.dto.PagedResponse;
@@ -18,32 +24,95 @@ import com.example.tamagochi_api_contract.dto.TamagochiRequest;
 import com.example.tamagochi_api_contract.dto.TamagochiResponse;
 import com.example.tamagochi_api_contract.dto.UpdateTamagochiRequest;
 import com.example.tamagochi_api_contract.exeption.ResourceNotFoundException;
+import com.example.tamagochirest.config.DiagnosticMode;
 import com.example.tamagochirest.domain.OwnerEntity;
 import com.example.tamagochirest.domain.TamagochiEntity;
 import com.example.tamagochirest.repository.OwnerRepository;
 import com.example.tamagochirest.repository.TamagochiRepository;
 import com.example.tamagochirest.event.TamagochiEventPublisher;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+
 @Service
 public class TamagochiService {
+
+    private static final Logger log = LoggerFactory.getLogger(TamagochiService.class);
 
     private final TamagochiRepository tamagochiRepository;
     private final OwnerRepository ownerRepository;
     private final TamagochiEventPublisher eventPublisher;
+    private final DiagnosticMode diagnosticMode;
+    private final MeterRegistry registry;
+    private final AtomicInteger active = new AtomicInteger(0);
 
     public TamagochiService(TamagochiRepository tamagochiRepository,
                            OwnerRepository ownerRepository,
-                           TamagochiEventPublisher eventPublisher) {
+                           TamagochiEventPublisher eventPublisher,
+                           DiagnosticMode diagnosticMode,
+                           MeterRegistry registry) {
         this.tamagochiRepository = tamagochiRepository;
         this.ownerRepository = ownerRepository;
         this.eventPublisher = eventPublisher;
+        this.diagnosticMode = diagnosticMode;
+        this.registry = registry;
+
+        registry.counter("tamagochi.requests", "result", "success");
+        registry.counter("tamagochi.requests", "result", "failure");
+        Timer.builder("tamagochi.processing")
+                .tag("result", "success")
+                .serviceLevelObjectives(Duration.ofMillis(500), Duration.ofSeconds(1))
+                .publishPercentileHistogram()
+                .register(registry);
+        Timer.builder("tamagochi.processing")
+                .tag("result", "failure")
+                .serviceLevelObjectives(Duration.ofMillis(500), Duration.ofSeconds(1))
+                .publishPercentileHistogram()
+                .register(registry);
+        Gauge.builder("tamagochi.active", active, AtomicInteger::get)
+                .register(registry);
     }
 
     @Transactional(readOnly = true)
     public TamagochiResponse findTamagochiById(UUID id) {
-        TamagochiEntity entity = tamagochiRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Tamagochi", id));
-        return toResponse(entity);
+        active.incrementAndGet();
+        Timer.Sample sample = Timer.start(registry);
+        String result = "success";
+
+        try {
+            applyDiagnosticMode();
+
+            TamagochiEntity entity = tamagochiRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tamagochi", id));
+            return toResponse(entity);
+        } catch (Exception e) {
+            result = "failure";
+            log.atWarn()
+                .addKeyValue("event", "tamagochi.fetch.failed")
+                .addKeyValue("outcome", "failure")
+                .addKeyValue("failureType", e.getClass().getSimpleName())
+                .log("Tamagochi fetch failed");
+            throw e;
+        } finally {
+            sample.stop(registry.timer("tamagochi.processing", "result", result));
+            registry.counter("tamagochi.requests", "result", result).increment();
+            active.decrementAndGet();
+        }
+    }
+
+    private void applyDiagnosticMode() {
+        DiagnosticMode.Mode mode = diagnosticMode.getCurrentMode();
+        if (mode == DiagnosticMode.Mode.SLOW) {
+            try {
+                Thread.sleep(750);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        } else if (mode == DiagnosticMode.Mode.FAIL) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Diagnostic failure mode active");
+        }
     }
 
     @Transactional(readOnly = true)

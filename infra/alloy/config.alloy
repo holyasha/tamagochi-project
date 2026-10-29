@@ -1,0 +1,51 @@
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+local.file_match "course_apps" {
+  path_targets = [{
+    __path__ = "/var/log/course-apps/*-service.log",
+  }]
+}
+
+loki.source.file "course_apps" {
+  targets    = local.file_match.course_apps.targets
+  forward_to = [loki.process.course_apps.receiver]
+}
+
+loki.process "course_apps" {
+  stage.json {
+    expressions = {
+      timestamp   = "@timestamp",
+      level       = "log.level",
+      service     = "service.name",
+      message     = "message",
+      traceId     = "traceId",
+      spanId      = "spanId",
+      requestId   = "requestId",
+      event       = "event",
+      outcome     = "outcome",
+      failureType = "failureType",
+    }
+  }
+
+  stage.labels {
+    values = {
+      job     = "course-apps",
+      service = "",
+    }
+  }
+
+  stage.output {
+    source = "message"
+  }
+
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
